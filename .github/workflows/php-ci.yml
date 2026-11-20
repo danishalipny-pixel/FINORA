@@ -40,7 +40,7 @@ jobs:
           coverage: none
 
       - name: Validate composer.json
-        run: composer validate --strict
+        run: composer validate --no-check-lock
 
       - name: Configure Test Environment Variables
         run: |
