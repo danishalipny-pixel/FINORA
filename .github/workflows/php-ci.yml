@@ -1,0 +1,62 @@
+name: FINORA Continuous Integration
+
+on:
+  push:
+    branches: [ master, main, develop ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  build-and-test:
+    name: Build, Lint & Test (PHP ${{ matrix.php-version }})
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version: ['8.2', '8.3']
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: rootpassword
+          MYSQL_DATABASE: finora_db
+          MYSQL_USER: finora_user
+          MYSQL_PASSWORD: finora_secret
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP Environment
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          extensions: mbstring, pdo, pdo_mysql, json, curl
+          coverage: none
+
+      - name: Validate composer.json
+        run: composer validate --strict
+
+      - name: Configure Test Environment Variables
+        run: |
+          cp .env.example .env
+          sed -i 's/DB_HOST=127.0.0.1/DB_HOST=127.0.0.1/g' .env
+          sed -i 's/DB_PORT=3306/DB_PORT=3306/g' .env
+          sed -i 's/DB_DATABASE=finora_db/DB_DATABASE=finora_db/g' .env
+          sed -i 's/DB_USERNAME=root/DB_USERNAME=finora_user/g' .env
+          sed -i 's/DB_PASSWORD=/DB_PASSWORD=finora_secret/g' .env
+          sed -i 's/APP_DEBUG=true/APP_DEBUG=true/g' .env
+
+      - name: Execute Database Migrations
+        run: php database/migrations/migrate.php
+
+      - name: Seed Demo User & Sample Data
+        run: php database/seeders/DatabaseSeeder.php
+
+      - name: Run Master Automated Test Suite
+        run: php tests/run_tests.php

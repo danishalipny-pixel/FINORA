@@ -1,0 +1,28 @@
+# Environment configuration
+.env
+.env.local
+.env.*.local
+
+# Vendor & dependencies
+/vendor/
+composer.phar
+
+# Application Storage & Logs
+/storage/logs/*.log
+/storage/uploads/*
+!/storage/uploads/.gitkeep
+/public/uploads/avatars/*
+!/public/uploads/avatars/.gitkeep
+
+# Operating System & IDE artifacts
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# Temporary files
+/tmp/
+*.tmp
+*.bak
