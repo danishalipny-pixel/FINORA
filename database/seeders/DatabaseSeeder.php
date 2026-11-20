@@ -14,6 +14,9 @@
 declare(strict_types=1);
 
 require_once dirname(__DIR__, 2) . '/bootstrap/app.php';
+require_once __DIR__ . '/SeederInterface.php';
+require_once __DIR__ . '/CategorySeeder.php';
+require_once __DIR__ . '/DemoUserSeeder.php';
 
 use App\Core\Database;
 use Database\Seeders\CategorySeeder;

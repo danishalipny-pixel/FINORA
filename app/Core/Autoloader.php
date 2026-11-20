@@ -2,7 +2,8 @@
 /**
  * FINORA - PSR-4 Class Autoloader
  *
- * Supports App\, Tests\, and Database\ namespaces.
+ * Supports App\, Tests\, and Database\ namespaces across both
+ * case-insensitive (Windows/macOS) and case-sensitive (Linux) filesystems.
  *
  * @package Finora\Core
  * @author Danish Ali <https://github.com/danishalipny-pixel>
@@ -43,6 +44,17 @@ class Autoloader
 
                 if (file_exists($file)) {
                     require $file;
+                    return;
+                }
+
+                // Case-sensitivity resolution on Linux: check lowercase subdirectory variants
+                $parts = explode('\\', $relativeClass);
+                $className = array_pop($parts);
+                $lowerPath = array_map('strtolower', $parts);
+                $lowerPath[] = $className;
+                $fallbackFile = $baseDir . implode(DIRECTORY_SEPARATOR, $lowerPath) . '.php';
+                if (file_exists($fallbackFile)) {
+                    require $fallbackFile;
                     return;
                 }
             }
